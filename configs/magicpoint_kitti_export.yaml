@@ -3,8 +3,11 @@ data:
     dataset: 'Kitti_inh'  # 'coco' 'hpatches', 'Kitti', ''
     export_folder: 'train'
     alteration: 'all'  # 'all' 'i' 'v'
-    root: 'datasets/kitti_wVal' # root for dataset
+    # root: 'datasets/kitti_wVal' # root for dataset
+    root: 'datasets/KITTI/2011_09_26/' # root for dataset
     root_split_txt: 'datasets/kitti_split'  # split file provided in datasets/kitti_split
+    labels: logs/magicpoint_synth20_homoAdapt100_kitti_h384_labels/predictions
+
     preprocessing:
        resize: [384, 1248]  # hand defined, original: [375, 1242]
         # resize: [192, 624]  # hand defined
@@ -31,6 +34,9 @@ data:
 #    name: 'coco'
 #    cache_in_memory: false
 #    validation_size: 100
+
+front_end_model: 'Val_model_heatmap'  # 'Train_model_frontend'
+
 model:
     # name: 'SuperPointNet'  # need to use old version of network
     name: 'SuperPointNet_gauss2' # 'SuperPointNet_gauss2'
@@ -38,10 +44,13 @@ model:
     detection_threshold: 0.015 # 0.015
     nms: 4
     top_k: 600 # no use
+    nn_thresh: 1.0 # 0.7
 
     params: {}
     subpixel:
         enable: false
+    pretrained: 'logs/superpoint_kitti_heat2_0/checkpoints/superPointNet_50000_checkpoint.pth.tar'
+
 
 # eval_iter: -1
 

@@ -82,7 +82,7 @@ class Train_model_heatmap(Train_model_frontend):
         self.cell_size = 8
         self.subpixel = False
 
-        self.max_iter = config["train_iter"]
+        self.max_iter = config["train_iter"] if "train_iter" in config else -1
 
         self.gaussian = False
         if self.config["data"]["gaussian_label"]["enable"]:

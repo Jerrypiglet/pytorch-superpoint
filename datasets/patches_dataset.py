@@ -32,7 +32,7 @@ class PatchesDataset(data.Dataset):
         }
     }
 
-    def __init__(self, transform=None, **config):
+    def __init__(self, transform=None, first_N=100,  **config):
         self.config = self.default_config
         self.config = dict_update(self.config, config)
         self.files = self._init_dataset(**self.config)
@@ -40,6 +40,8 @@ class PatchesDataset(data.Dataset):
         for (img, img_warped, mat_hom) in zip(self.files['image_paths'], self.files['warped_image_paths'], self.files['homography']):
             sample = {'image': img, 'warped_image': img_warped, 'homography': mat_hom}
             sequence_set.append(sample)
+        if first_N != -1:
+            sequence_set = sequence_set[:first_N]
         self.samples = sequence_set
         self.transform = transform
         if config['preprocessing']['resize']:

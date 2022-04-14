@@ -97,7 +97,7 @@ def export_descriptor(config, output_dir, args):
     ## parameters
     outputMatches = True
     subpixel = config["model"]["subpixel"]["enable"]
-    patch_size = config["model"]["subpixel"]["patch_size"]
+    patch_size = config["model"]["subpixel"]["patch_size"] if "patch_size" in config["model"]["subpixel"] else None
 
     # data loading
     from utils.loader import dataLoader_test as dataLoader

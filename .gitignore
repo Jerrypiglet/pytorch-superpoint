@@ -1,0 +1,7 @@
+datasets/*
+runs/*
+*.pyc
+logs/*/predictions/*
+logs/magicpoint_synth/checkpoints/*
+notebooks/.ipynb_checkpoints/*
+logs/magicpoint_synth20_homoAdapt100_kitti_h384_labels

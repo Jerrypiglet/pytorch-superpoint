@@ -33,9 +33,15 @@ def plot_imgs(imgs, titles=None, cmap='brg', ylabel='', normalize=False, ax=None
     for i in range(n):
         if imgs[i].shape[-1] == 3:
             imgs[i] = imgs[i][..., ::-1]  # BGR to RGB
-        ax[i].imshow(imgs[i], cmap=plt.get_cmap(cmap[i]),
-                     vmin=None if normalize else 0,
-                     vmax=None if normalize else 1)
+        if len(imgs[i].shape) == 3:
+            ax[i].imshow(imgs[i], cmap=plt.get_cmap(cmap[i]),
+                        vmin=None if normalize else 0,
+                        vmax=None if normalize else 1)
+        elif len(imgs[i].shape) == 2:
+            ax[i].imshow((imgs[i]*255.).astype(np.uint8), cmap='gray', vmin=0, vmax=255)
+        else:
+            raise (RuntimeError('Invalid image shape at plot_imgs!!'))
+
         if titles:
             ax[i].set_title(titles[i])
         ax[i].get_yaxis().set_ticks([])

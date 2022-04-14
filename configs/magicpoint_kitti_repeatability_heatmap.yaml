@@ -1,13 +1,20 @@
 data:
-    name: 'patches_dataset'
-    dataset: 'hpatches'  # 'coco' 'hpatches'
-    alteration: 'all'  # 'all' 'i' 'v'
+    name: 'kitti_dataset'
+    dataset: 'Kitti_inh'  # 'coco' 'hpatches'
+    root:  './datasets/KITTI/2011_09_26/' # /data/kitti/kitti_wVal
+    root_split_txt: 'datasets/kitti_split'   
+    labels: logs/magicpoint_synth20_homoAdapt100_kitti_h384_labels/predictions
+
+    gaussian_label:
+        enable: false
+        params:
+            GaussianBlur: {sigma: 0.2}
+
     preprocessing:
-        resize: [240, 320]  # [240, 320] for HPatches and False for coco
-#        resize: [480, 640]  # [240, 320] for HPatches and False for coco
-    # labels: magicpoint_synth20_homoAdapt100_coco/predictions # for coco
+        resize: [384, 1248]  # hand defined, original: [375, 1242]
 
 front_end_model: 'Val_model_heatmap'  # 'Train_model_frontend'
+
 model:
     # name: 'magic_point'
     name: 'SuperPointNet_gauss2' # SuperPointNet_heatmap
@@ -33,11 +40,11 @@ model:
     rand_noise:
         enable: false
         sigma: 0.2
-    # pretrained: 'logs/superpoint_kitti_heat2_0/checkpoints/superPointNet_50000_checkpoint.pth.tar'
+    pretrained: 'logs/superpoint_kitti_heat2_0/checkpoints/superPointNet_50000_checkpoint.pth.tar'
     # pretrained: 'logs/superpoint_spollo_v0/checkpoints/superPointNet_40000_checkpoint.pth.tar'
     # pretrained: 'logs/superpoint_coco/checkpoints/superPointNet_180_checkpoint.pth.tar'
+    # pretrained: 'logs/superpoint_coco_heat2_0/checkpoints/superPointNet_170000_checkpoint.pth.tar'
 
-    pretrained: 'logs/superpoint_coco_heat2_0/checkpoints/superPointNet_170000_checkpoint.pth.tar'
-    # pretrained: 'logs/magicpoint_synth_t2/checkpoints/superPointNet_100000_checkpoint.pth.tar'
+
 
 eval_iter: 1000

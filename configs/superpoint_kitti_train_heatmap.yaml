@@ -1,7 +1,7 @@
 data:
     name: 'kitti'
     dataset: 'Kitti_inh' # 'Kitti'
-    root:  './datasets/KITTI/' # /data/kitti/kitti_wVal
+    root:  './datasets/KITTI/2011_09_26/' # /data/kitti/kitti_wVal
     root_split_txt: 'datasets/kitti_split'   
     labels: logs/magicpoint_synth20_homoAdapt100_kitti_h384_labels/predictions
 
@@ -63,8 +63,8 @@ model:
         loss_type: 'softmax'
 
 
-    batch_size: 4 # 32
-    eval_batch_size: 4
+    batch_size: 2 # 32
+    eval_batch_size: 2
     learning_rate: 0.0001
     detection_threshold: 0.015 # 0.015
     nms: 4
@@ -86,15 +86,16 @@ model:
             other_settings: 'train from scratch, 2d method'
     lambda_res: 100
 
-retrain: true  # set true for new model
-reset_iter: true
+# retrain: true  # set true for new model
+# reset_iter: true
+retrain: false  # set true for new model
+reset_iter: false
 train_iter: 170000
-validation_interval: 2000
-tensorboard_interval: 400
+validation_interval: 20
+tensorboard_interval: 40
 save_interval: 2000
 validation_size: 5
 
-pretrained:
-# pretrained: 'logs/superpoint_coco_heat2_0/checkpoints/superPointNet_90000_checkpoint.pth.tar'
+pretrained: 'logs/superpoint_kitti_heat2_0/checkpoints/superPointNet_50000_checkpoint.pth.tar'
 
 

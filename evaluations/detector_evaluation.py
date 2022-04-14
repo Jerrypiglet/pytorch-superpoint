@@ -148,7 +148,7 @@ def warp_keypoints(keypoints, H):
     return warped_points[:, :2] / warped_points[:, 2:]
 
 def compute_repeatability(data, keep_k_points=300,
-                          distance_thresh=3, verbose=False):
+                          distance_thresh=3, verbose=False, if_harris=False):
     """
     Compute the repeatability. The experiment must contain in its output the prediction
     on 2 images, an original image and a warped version of it, plus the homography
@@ -214,10 +214,12 @@ def compute_repeatability(data, keep_k_points=300,
     # warped_keypoints = np.stack([warped_keypoints[0],
     #                              warped_keypoints[1],
     #                              warped_prob], axis=-1)
-    # keypoints = data['prob'][:, :2]
-    keypoints = data['prob']
-    # warped_keypoints = data['warped_prob'][:, :2]
-    warped_keypoints = data['warped_prob']
+    if not if_harris:
+        keypoints = data['prob']
+        warped_keypoints = data['warped_prob']
+    else:
+        keypoints = data['harris_corners']
+        warped_keypoints = data['warped_harris_corners']
     
     warped_keypoints = keep_true_keypoints(warped_keypoints, np.linalg.inv(H),
                                            data['image'].shape)

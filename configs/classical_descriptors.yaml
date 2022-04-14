@@ -9,7 +9,8 @@ data:
 #        resize: [480, 640]  # False for coco
 model:
     name: 'classical_detectors_descriptors'
-    method: 'sift'  # 'orb' 'sift'
+    method: 'sift'  # 'orb' 'sift', 'harris'
+    # method: 'harris'  # 'orb' 'sift', 'harris'
     batch_size: 1  # unused
     learning_rate: 0.001  # unused
     nms: 4

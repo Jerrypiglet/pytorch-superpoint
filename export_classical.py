@@ -102,16 +102,46 @@ def export_descriptor(config, output_dir, args):
                 ## collect descriptros
                 desc = desc[y, x, :]
             else:
-                # sift with subpixel accuracy
-                from models.classical_detectors_descriptors import SIFT_det as classical_detector_descriptor
-                pnts, desc = classical_detector_descriptor(image, image)
+                if method == 'sift':
+                    # sift with subpixel accuracy
+                    from models.classical_detectors_descriptors import SIFT_det as classical_detector_descriptor
+                    pnts, desc = classical_detector_descriptor(image, image)
+                # elif method == 'harris':
+                #     pnts, desc = np.ones((10, 2), dtype=np.float64), np.zeros((10, 128), dtype=np.float32)
+                # import cv2
+                # dst = cv2.cornerHarris(image,2,3,0.04)
 
-            print("desc shape: ", desc.shape)
-            return pnts, desc
+                # find Harris corners https://docs.opencv.org/3.4/dc/d0d/tutorial_py_features_harris.html
+                import cv2 as cv
+                gray = np.float32(image/255.)
+                dst = cv.cornerHarris(gray,2,3,0.04)
+                dst = cv.dilate(dst,None)
+                ret, dst = cv.threshold(dst,0.01*dst.max(),255,0)
+                dst = np.uint8(dst)
+                # find centroids
+                ret, labels, stats, centroids = cv.connectedComponentsWithStats(dst)
+                # define the criteria to stop and refine the corners
+                criteria = (cv.TERM_CRITERIA_EPS + cv.TERM_CRITERIA_MAX_ITER, 100, 0.001)
+                harris_corners = cv.cornerSubPix(gray,np.float32(centroids),(5,5),(-1,-1),criteria) # [N, 2], (u, v), float
+                # Now draw them
+                # res = np.hstack((centroids,corners))
+                # res = np.int0(res)
+                # # image[res[:,1],res[:,0]]=[0,0,255]
+                # image[np.clip(res[:,3], 0, 239),res[:,2]] = [0,255,0]
+                # # cv.imwrite('subpixel5.png',img)
+                # import matplotlib.pyplot as plt
+                # plt.figure(figsize=(15, 8))
+                # plt.imshow(image)
+                # plt.show()
+                # print(image.shape)
+
+
+            print("desc shape: ", desc.shape, pnts.shape, harris_corners.shape)
+            return pnts, desc, harris_corners
 
 
         pts_list = []
-        pts, desc_1 = classicalDetectors(imgs_np[0], method=method)
+        pts, desc_1, harris_corners = classicalDetectors(imgs_np[0], method=method)
         pts_list.append(pts)
         print("total points: ", pts.shape)
         '''
@@ -125,7 +155,8 @@ def export_descriptor(config, output_dir, args):
             'image': imgs_np[0],
         })
         pred.update({'prob': pts,
-                     'desc': desc_1})
+                     'desc': desc_1, 
+                     'harris_corners': harris_corners})
 
         # second image, output matches
 
@@ -133,7 +164,7 @@ def export_descriptor(config, output_dir, args):
             'warped_image': imgs_np[1],
             # 'warped_image_fil': imgs_fil[1],
         })
-        pts, desc_2 = classicalDetectors(imgs_np[1], method=method)
+        pts, desc_2, harris_corners = classicalDetectors(imgs_np[1], method=method)
         pts_list.append(pts)
 
         # if outputMatches == True:
@@ -143,6 +174,7 @@ def export_descriptor(config, output_dir, args):
         print("total points: ", pts.shape)
         pred.update({'warped_prob': pts,
                      'warped_desc': desc_2,
+                     'warped_harris_corners': harris_corners, 
                      'homography': squeezeToNumpy(sample['homography'])
                      })
 

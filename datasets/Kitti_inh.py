@@ -80,7 +80,7 @@ class Kitti_inh(Coco):
         )
         self.scenes = [
             # (label folder, raw image path)
-            (Path(self.root / folder[:-1]), Path(self.root / folder[:-4] / 'image_02' / 'data') ) \
+            (Path(self.root / folder[:-1]), Path(self.root / folder[:26] / 'image_02' / 'data') ) \
                 for folder in open(scene_list_path)
         ]
         # self.scenes_imgs = [
@@ -132,6 +132,7 @@ class Kitti_inh(Coco):
 
             # X_files = sorted(scene.glob('*.npy'))
             if len(imgs) < sequence_length:
+                print('[!!!] Insufficient images for scene %d!'%scene)
                 continue
             # for i in range(demi_length, len(imgs)-demi_length):
             for i in range(0, len(imgs) - demi_length):
@@ -170,7 +171,7 @@ class Kitti_inh(Coco):
                 # print(sample)
         random.shuffle(sequence_set)
         self.samples = sequence_set
-        logging.info("Finished crawl_folders for KITTI.")
+        logging.info("Finished crawl_folders for KITTI: %d samples from %d scenes."%(len(self.samples), len(self.scenes)))
 
     def get_img_from_sample(self, sample):
         # imgs = [_preprocess(_read_image(img)[:, :, np.newaxis]) for img in sample['imgs']]

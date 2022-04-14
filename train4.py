@@ -60,6 +60,7 @@ def train_joint(config, output_dir, args):
     # writer = SummaryWriter(getWriterPath(task=args.command, date=True))
     writer = SummaryWriter(getWriterPath(task=args.command, 
         exper_name=args.exper_name, date=True))
+
     ## save data
     save_path = get_save_path(output_dir)
 

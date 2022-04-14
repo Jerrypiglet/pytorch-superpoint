@@ -42,7 +42,7 @@ def draw_matches_cv(data, matches, plot_points=True):
     img2 = to3dim(data['image2'])
     img1 = np.concatenate([img1, img1, img1], axis=2)
     img2 = np.concatenate([img2, img2, img2], axis=2)
-    return cv2.drawMatches(img1, keypoints1, img2, keypoints2, matches,
+    return cv2.drawMatches(np.uint8(img1), keypoints1, np.uint8(img2), keypoints2, matches,
                            None, matchColor=(0,255,0), singlePointColor=(0, 0, 255))
 
 def isfloat(value):
@@ -78,9 +78,11 @@ def evaluate(args, **options):
     correctness = []
     est_H_mean_dist = []
     repeatability = []
+    repeatability_HARRIS = []
     mscore = []
     mAP = []
     localization_err = []
+    localization_err_HARRIS = []
     rep_thd = 3
     save_file = path + "/result.txt"
     inliers_method = 'cv'
@@ -116,7 +118,7 @@ def evaluate(args, **options):
     for f in tqdm(files):
         f_num = f[:-4]
         data = np.load(path + '/' + f)
-        print("load successfully. ", f)
+        print("======> load successfully. ", f)
 
         # unwarp
         # prob = data['prob']
@@ -133,8 +135,12 @@ def evaluate(args, **options):
         print("warped_keypoints: ", warped_keypoints[:3,:])
         # print("Unwrap successfully.")
 
+        extra = ''
+        if args.sift:
+            extra = '_SIFT'
+
         if args.repeatibility:
-            rep, local_err = compute_repeatability(data, keep_k_points=top_K, distance_thresh=rep_thd, verbose=False)
+            rep, local_err = compute_repeatability(data, keep_k_points=top_K, distance_thresh=rep_thd, verbose=False, if_harris=False)
             repeatability.append(rep)
             print("repeatability: %.2f"%(rep))
             if local_err > 0:
@@ -155,8 +161,34 @@ def evaluate(args, **options):
                 plt.title("rep: " + str(repeatability[-1]))
                 plt.tight_layout()
                 
-                plt.savefig(path_rep + '/' + f_num + '.png', dpi=300, bbox_inches='tight')
+                plt.savefig(path_rep + '/' + f_num + '%s.png'%extra, dpi=300, bbox_inches='tight')
                 pass
+
+            if_harris = 'harris_corners' in data
+            if if_harris:
+                rep, local_err = compute_repeatability(data, keep_k_points=top_K, distance_thresh=rep_thd, verbose=False, if_harris=True)
+                repeatability_HARRIS.append(rep)
+                print("HARRIS repeatability: %.2f"%(rep))
+                if local_err > 0:
+                    localization_err_HARRIS.append(local_err)
+                    print('HARRIS local_err: ', local_err)
+                if args.outputImg:
+                    # img = to3dim(image)
+                    img = image
+                    pts = data['harris_corners']
+                    img1 = draw_keypoints(img*255, pts.transpose())
+
+                    # img = to3dim(warped_image)
+                    img = warped_image
+                    pts = data['warped_harris_corners']
+                    img2 = draw_keypoints(img*255, pts.transpose())
+
+                    plot_imgs([img1.astype(np.uint8), img2.astype(np.uint8)], titles=['img1', 'img2'], dpi=200)
+                    plt.title("rep: " + str(repeatability_HARRIS[-1]))
+                    plt.tight_layout()
+                    
+                    plt.savefig(path_rep + '/' + f_num + '_HARRIS.png', dpi=300, bbox_inches='tight')
+                    pass
 
 
         if args.homography:
@@ -298,8 +330,8 @@ def evaluate(args, **options):
             if args.outputImg:
                 # draw warping
                 output = result
-                # img1 = image/255
-                # img2 = warped_image/255
+                # img1 = image/255.
+                # img2 = warped_image/255.
                 img1 = image
                 img2 = warped_image
 
@@ -312,17 +344,18 @@ def evaluate(args, **options):
                 img1 = np.concatenate([img1, img1, img1], axis=2)
                 warped_img1 = np.stack([warped_img1, warped_img1, warped_img1], axis=2)
                 img2 = np.concatenate([img2, img2, img2], axis=2)
+
                 plot_imgs([img1, img2, warped_img1], titles=['img1', 'img2', 'warped_img1'], dpi=200)
                 plt.tight_layout()
-                plt.savefig(path_warp + '/' + f_num + '.png')
+                plt.savefig(path_warp + '/' + f_num + '%s.png'%extra)
 
                 ## plot filtered image
                 img1, img2 = data['image'], data['warped_image']
                 warped_img1 = cv2.warpPerspective(img1, H, (img2.shape[1], img2.shape[0]))
                 plot_imgs([img1, img2, warped_img1], titles=['img1', 'img2', 'warped_img1'], dpi=200)
                 plt.tight_layout()
-                # plt.savefig(path_warp + '/' + f_num + '_fil.png')
-                plt.savefig(path_warp + '/' + f_num + '.png')
+                # plt.savefig(path_warp + '/' + f_num + '_fil%s.png'%extra)
+                plt.savefig(path_warp + '/' + f_num + '%s.png'%extra)
 
                 # plt.show()
 
@@ -337,7 +370,7 @@ def evaluate(args, **options):
                 # filename = "correspondence_visualization"
                 plot_imgs([img], titles=["Two images feature correspondences"], dpi=200)
                 plt.tight_layout()
-                plt.savefig(path_match + '/' + f_num + 'cv.png', bbox_inches='tight')
+                plt.savefig(path_match + '/' + f_num + 'cv%s.png'%extra, bbox_inches='tight')
                 plt.close('all')
                 # pltImshow(img)
 
@@ -345,7 +378,7 @@ def evaluate(args, **options):
             matches = result['matches'] # np [N x 4]
             if matches.shape[0] > 0:
                 from utils.draw import draw_matches
-                filename = path_match + '/' + f_num + 'm.png'
+                filename = path_match + '/' + f_num + 'm%s.png'%extra
                 ratio = 0.1
                 inliers = result['inliers']
 
@@ -375,19 +408,28 @@ def evaluate(args, **options):
     if args.repeatibility:
         repeatability_ave = np.array(repeatability).mean()
         localization_err_m = np.array(localization_err).mean()
-        print("repeatability: ", repeatability_ave)
-        print("localization error over ", len(localization_err), " images : ", localization_err_m)
+        extra = ''
+        if args.sift:
+            extra = '[SIFT] '
+        print("%srepeatability: "%extra, repeatability_ave)
+        print("%slocalization error over "%extra, len(localization_err), " images : ", localization_err_m)
+        if repeatability_HARRIS:
+            repeatability_HARRIS_ave = np.array(repeatability_HARRIS).mean()
+            localization_err_HARRIS_m = np.array(localization_err_HARRIS).mean()
+            print("[HARRIS] repeatability: ", repeatability_HARRIS_ave)
+            print("[HARRIS] localization error over ", len(localization_err_HARRIS), " images: ", localization_err_HARRIS_m)
+
     if args.homography:
         correctness_ave = np.array(correctness).mean(axis=0)
         # est_H_mean_dist = np.array(est_H_mean_dist)
-        print("homography estimation threshold", homography_thresh)
-        print("correctness_ave", correctness_ave)
+        print("%shomography estimation threshold"%extra, homography_thresh)
+        print("%scorrectness_ave"%extra, correctness_ave)
         # print(f"mean est H dist: {est_H_mean_dist.mean()}")
         mscore_m = np.array(mscore).mean(axis=0)
-        print("matching score", mscore_m)
+        print("%smatching score"%extra, mscore_m)
         if compute_map:
             mAP_m = np.array(mAP).mean()
-            print("mean AP", mAP_m)
+            print("%smean AP"%extra, mAP_m)
 
         print("end")
 

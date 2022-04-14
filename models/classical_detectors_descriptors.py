@@ -43,11 +43,11 @@ def SIFT_det(img, img_rgb, visualize=False, nfeatures=2000):
         des: np [N, 128] (descriptors)
     """
     # Initiate SIFT detector
-    # pip install opencv-python==3.4.2.16, opencv-contrib-python==3.4.2.16
+    # pip install opencv-python-headless
     # https://www.pyimagesearch.com/2015/07/16/where-did-sift-and-surf-go-in-opencv-3/
     img = np.uint8(img)
     # print("img: ", img)
-    sift = cv2.xfeatures2d.SIFT_create(contrastThreshold=1e-5)
+    sift = cv2.SIFT_create(contrastThreshold=1e-5)
 
     # find the keypoints and descriptors with SIFT
     kp, des = sift.detectAndCompute(img, None)
