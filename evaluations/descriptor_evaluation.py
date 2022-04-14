@@ -57,7 +57,7 @@ def keep_shared_points(keypoint_map, H, keep_k_points=1000):
 
     return keypoints.astype(int)
 
-def compute_homography(data, keep_k_points=1000, correctness_thresh=3, orb=False, shape=(240,320)):
+def compute_homography(data, keep_k_points=1000, correctness_thresh=3, orb=False, shape=(240,320), if_only_matching=False):
     """
     Compute the homography between 2 sets of detections and descriptors inside data.
     """
@@ -105,6 +105,15 @@ def compute_homography(data, keep_k_points=1000, correctness_thresh=3, orb=False
     # matches_pts = data['match_quality_good']
     # cv_matches = data['cv_matches']
     # print(f"matches: {matches_pts.shape}")
+    if if_only_matching:
+        return {
+            'keypoints1': keypoints,
+            'keypoints2': warped_keypoints,
+            'matches': matches,  # cv2.match
+            'cv2_matches': cv2_matches,
+            'mscores': m_dist/(m_dist.max()), # normalized distance
+            }
+
     
 
     # Estimate the homography between the matches using RANSAC

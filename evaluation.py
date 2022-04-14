@@ -90,6 +90,7 @@ def evaluate(args, **options):
     verbose = True
     top_K = 1000
     print("top_K: ", top_K)
+    result = []
 
     reproduce = True
     if reproduce:
@@ -191,10 +192,10 @@ def evaluate(args, **options):
                     pass
 
 
+        homography_thresh = [1,3,5,10,20,50]
         if args.homography:
             # estimate result
             ##### check
-            homography_thresh = [1,3,5,10,20,50]
             #####
             result = compute_homography(data, correctness_thresh=homography_thresh)
             correctness.append(result['correctness'])
@@ -374,6 +375,27 @@ def evaluate(args, **options):
                 plt.close('all')
                 # pltImshow(img)
 
+        if args.plotMatchingOnly:
+            if 'matches' not in result:
+                result = compute_homography(data, if_only_matching=True)
+
+            matches = result['matches'] # np [N x 4]
+            if matches.shape[0] > 0:
+                from utils.draw import draw_matches
+                filename = path_match + '/' + f_num + 'm%s.png'%extra
+                ratio = 0.1
+                matches_max = 10
+
+                def get_random_m(matches, ratio):
+                    output_num = min(int(matches.shape[0]*ratio), matches_max)
+                    ran_idx = np.random.choice(matches.shape[0], output_num)
+                    return matches[ran_idx], ran_idx
+                image = data['image']
+                warped_image = data['warped_image']
+                matches_temp, _ = get_random_m(matches, ratio)
+                draw_matches(image, warped_image, matches_temp, lw=0.5, color='y', 
+                        filename=filename, show=False, if_fig=False)
+
         if args.plotMatching:
             matches = result['matches'] # np [N x 4]
             if matches.shape[0] > 0:
@@ -399,10 +421,6 @@ def evaluate(args, **options):
                 matches_temp, _ = get_random_m(matches_in, ratio)
                 draw_matches(image, warped_image, matches_temp, lw=1.0, 
                         filename=filename, show=False, if_fig=False)
-
-
-
-
 
 
     if args.repeatibility:
@@ -503,5 +521,6 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--repeatibility', action='store_true')
     parser.add_argument('-homo', '--homography', action='store_true')
     parser.add_argument('-plm', '--plotMatching', action='store_true')
+    parser.add_argument('-plmo', '--plotMatchingOnly', action='store_true')
     args = parser.parse_args()
     evaluate(args)

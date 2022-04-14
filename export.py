@@ -171,7 +171,7 @@ def export_descriptor(config, output_dir, args):
             {
                 "warped_prob": pts.transpose(),
                 "warped_desc": desc.transpose(),
-                "homography": squeezeToNumpy(sample["homography"]),
+                "homography": squeezeToNumpy(sample["homography"]) if "homography" in sample else np.zeros(1),
             }
         )
 
@@ -224,7 +224,6 @@ def export_detector_homoAdapt_gpu(config, output_dir, args):
     nn_thresh = 0.7
     outputMatches = True
     count = 0
-    max_length = 5
     output_images = args.outputImg
     check_exist = True
 
