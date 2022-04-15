@@ -1,4 +1,9 @@
-datasets/*
+datasets/draw*
+datasets/gaussian*
+datasets/synthetic*
+datasets/KITTI
+datasets/HPatches
+datasets/kitti_split_
 runs/*
 *.pyc
 logs/*/predictions/*
