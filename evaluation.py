@@ -383,7 +383,7 @@ def evaluate(args, **options):
             if matches.shape[0] > 0:
                 from utils.draw import draw_matches
                 filename = path_match + '/' + f_num + 'm%s.png'%extra
-                ratio = 0.1
+                ratio_max = 0.1
                 matches_max = 10
 
                 def get_random_m(matches, ratio):
@@ -392,7 +392,7 @@ def evaluate(args, **options):
                     return matches[ran_idx], ran_idx
                 image = data['image']
                 warped_image = data['warped_image']
-                matches_temp, _ = get_random_m(matches, ratio)
+                matches_temp, _ = get_random_m(matches, ratio_max)
                 draw_matches(image, warped_image, matches_temp, lw=0.5, color='y', 
                         filename=filename, show=False, if_fig=False)
 
