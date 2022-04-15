@@ -5,8 +5,8 @@ data:
     preprocessing:
         resize: [384, 1248]  # hand defined, original: [375, 1242]
     # labels: magicpoint_synth20_homoAdapt100_coco/predictions # for coco
-    im_path1: '/home/ruizhu/Documents/Projects/pytorch-superpoint/datasets/kitti/2011_09_26_drive_0001_sync_02/0000000000.jpg'
-    im_path2: '/home/ruizhu/Documents/Projects/pytorch-superpoint/datasets/kitti/2011_09_26_drive_0001_sync_02/0000000005.jpg'
+    im_path1: 'datasets/kitti/2011_09_26_drive_0001_sync_02/0000000000.jpg'
+    im_path2: 'datasets/kitti/2011_09_26_drive_0001_sync_02/0000000005.jpg'
 
 front_end_model: 'Val_model_heatmap'  # 'Train_model_frontend'
 model:
